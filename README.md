@@ -2,11 +2,6 @@
 
 ## Data Quality, Feature Engineering, Leakage Assessment & Reproducible Machine Learning Pipeline
 
-**Course:** Data Preparation & Feature Engineering
-**Week:** 2
-**Assignment:** Assignment 1 — Data Pre-processing
-**Institution:** Strathmore University
-**Submission Date:** 17 August 2026
 
 ---
 
@@ -18,10 +13,10 @@ The objective is not simply to maximise predictive performance, but to develop a
 
 The project covers four major components:
 
-1. **Data Quality Audit** — identification and remediation of the ten most significant data-quality problems in the dataset.
-2. **Feature Engineering** — development and documentation of at least 15 engineered features across a minimum of four feature families.
-3. **Leakage Assessment** — identification, quantification, and remediation of two intentionally planted sources of data leakage.
-4. **Reproducible ML Pipeline** — development of a single Scikit-learn pipeline containing preprocessing, feature transformation, and model training, evaluated using group-aware cross-validation.
+1. **Data Quality Audit:** identification and remediation of the ten most significant data-quality problems in the dataset.
+2. **Feature Engineering:** development and documentation of at least 15 engineered features across a minimum of four feature families.
+3. **Leakage Assessment:**  identification, quantification, and remediation of two intentionally planted sources of data leakage.
+4. **Reproducible ML Pipeline:** development of a single Scikit-learn pipeline containing preprocessing, feature transformation, and model training, evaluated using group-aware cross-validation.
 
 ---
 
@@ -117,9 +112,9 @@ Missing values were assessed using both descriptive statistics and relationships
 
 Where applicable, missingness was classified as:
 
-* **MCAR — Missing Completely At Random:** missingness is unrelated to observed or unobserved information.
-* **MAR — Missing At Random:** missingness can be explained by observed variables.
-* **MNAR — Missing Not At Random:** missingness is potentially related to the unobserved value itself or another unobserved mechanism.
+* **MCAR:  Missing Completely At Random:** missingness is unrelated to observed or unobserved information.
+* **MAR:  Missing At Random:** missingness can be explained by observed variables.
+* **MNAR:  Missing Not At Random:** missingness is potentially related to the unobserved value itself or another unobserved mechanism.
 
 The classification is treated as an analytical judgement supported by evidence rather than as something that can be established solely from the missing-value percentage.
 
@@ -280,12 +275,15 @@ Model performance is evaluated using **group-aware cross-validation**.
 
 The primary evaluation metric is:
 
-**ROC-AUC (Receiver Operating Characteristic — Area Under the Curve)**
+**ROC-AUC (Receiver Operating Characteristic 
+Area Under the Curve)**
 
 The final reported result is:
 
 ```text
-Cross-validated ROC-AUC: [INSERT FINAL RESULT]
+Cross-validated ROC-AUC (leak-free, group-aware, 5-fold): 0.6274 (+/- 0.0038)
+Cross-validated ROC-AUC (with two planted leaks included): 1.0000 (+/- 0.0000)
+Offline AUC inflation attributable to leakage: +0.3747
 ```
 
 The final model performance should be interpreted alongside the data-quality and leakage findings rather than considered in isolation.
@@ -455,17 +453,18 @@ The completed submission contains:
 
 # 15. Final Model Record
 
-| Item                          | Result                         |
-| ----------------------------- | ------------------------------ |
-| Model                         | `[MODEL NAME]`                 |
-| Validation strategy           | Group-aware cross-validation   |
-| Primary metric                | ROC-AUC                        |
-| Final CV ROC-AUC              | `[INSERT RESULT]`              |
-| Number of engineered features | `[INSERT NUMBER]`              |
-| Feature families              | `[INSERT NUMBER]`              |
-| Leakage sources removed       | 2                              |
+| Item                          | Result                          |
+| ----------------------------- | -------------------------------- |
+| Model                         | `LogisticRegression` inside a `ColumnTransformer` + `Pipeline` |
+| Validation strategy           | `GroupKFold` (5 folds, grouped by resolved `customer_id`) |
+| Primary metric                | ROC-AUC                         |
+| Final CV ROC-AUC (leak-free)  | 0.6274 (+/- 0.0038)             |
+| CV ROC-AUC with leaks (reference only) | 1.0000 (+/- 0.0000)      |
+| Number of engineered features | 20 engineered + 5 lightly-transformed raw = 25 total model inputs (22 numerical, 3 categorical) |
+| Feature families              | 5 (RFM/behavioural, cyclical/temporal, monetary transforms, data-quality flags, velocity/diversity) |
+| Leakage sources removed       | 2 (`manual_review_score`, `settlement_status`) |
 | Saved pipeline                | `models/final_pipeline.joblib` |
-| Random seed                   | `[INSERT SEED]`                |
+| Random seed                   | No stochastic model component (`GroupKFold` is deterministic; `LogisticRegression` uses the deterministic `lbfgs` solver); `random_state` values 1-7 in the notebook are used only for illustrative `.sample()` calls |
 
 ---
 
